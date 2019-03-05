@@ -9,16 +9,17 @@ pub use envelope::ProtoBufEnvelope;
 pub use filter::*;
 pub use input::*;
 pub use interface::{ExternalInterface, ProtoBufInterface};
+
+use crate::Error as CrateError;
+use prelude::*;
 use prisma_common::{error::Error, PrismaResult};
 use prisma_models::prelude::*;
 use prisma_query::ast::*;
+use std::sync::Arc;
 
 pub mod prisma {
     include!(concat!(env!("OUT_DIR"), "/prisma.rs"));
 }
-
-use crate::Error as CrateError;
-use prelude::*;
 
 impl RpcResponse {
     pub fn header() -> Header {
@@ -34,7 +35,7 @@ impl RpcResponse {
         }
     }
 
-    pub fn ok(result: NodesResult) -> RpcResponse {
+    pub fn ok(result: prisma::NodesResult) -> RpcResponse {
         RpcResponse {
             header: Self::header(),
             response: Some(rpc::Response::Result(prisma::Result {
@@ -49,22 +50,6 @@ impl RpcResponse {
             response: Some(rpc::Response::Error(ProtoError {
                 value: Some(error.into()),
             })),
-        }
-    }
-}
-
-impl SelectedField {
-    pub fn is_scalar(&self) -> bool {
-        match self.field {
-            Some(selected_field::Field::Scalar(_)) => true,
-            _ => false,
-        }
-    }
-
-    pub fn is_relational(&self) -> bool {
-        match self.field {
-            Some(selected_field::Field::Relational { .. }) => true,
-            _ => false,
         }
     }
 }
@@ -148,11 +133,42 @@ impl From<GraphqlId> for prisma::GraphqlId {
     }
 }
 
-impl From<Vec<PrismaValue>> for Node {
-    fn from(values: Vec<PrismaValue>) -> Node {
-        Node {
-            values: values.into_iter().map(ValueContainer::from).collect(),
+impl From<Node> for prisma::Node {
+    fn from(node: Node) -> prisma::Node {
+        prisma::Node {
+            values: node.values.into_iter().map(ValueContainer::from).collect(),
+            parent_id: node.parent_id.map(prisma::GraphqlId::from),
         }
+    }
+}
+
+impl IntoSelectedFields for prisma::SelectedFields {
+    fn into_selected_fields(self, model: ModelRef, from_field: Option<Arc<RelationField>>) -> SelectedFields {
+        let fields = self.fields.into_iter().fold(Vec::new(), |mut acc, sf| {
+            match sf.field.unwrap() {
+                prisma::selected_field::Field::Scalar(field_name) => {
+                    let field = model.fields().find_from_scalar(&field_name).unwrap();
+
+                    acc.push(SelectedField::Scalar(SelectedScalarField { field }));
+                }
+                prisma::selected_field::Field::Relational(rf) => {
+                    let field = model.fields().find_from_relation_fields(&rf.field).unwrap();
+
+                    let selected_fields = rf
+                        .selected_fields
+                        .into_selected_fields(model.clone(), from_field.clone());
+
+                    acc.push(SelectedField::Relation(SelectedRelationField {
+                        field,
+                        selected_fields,
+                    }));
+                }
+            }
+
+            acc
+        });
+
+        SelectedFields::new(fields, from_field)
     }
 }
 
