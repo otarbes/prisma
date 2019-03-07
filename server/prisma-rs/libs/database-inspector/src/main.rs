@@ -1,62 +1,61 @@
 use barrel::{backend::Sqlite as Squirrel, types, Migration};
-use prisma_models::prelude::*;
-use rusqlite::{types::ToSql, Connection, Result, NO_PARAMS};
+// use prisma_models::prelude::*;
 
-/// Create an in-memory database and run migrations on it
-fn create_database() -> Connection {
-    Connection::open_in_memory()
-        .and_then(|c| c.execute(&{
-            let mut m = Migration::new();
-            m.create_table("prisma", |t| {
-                t.add_column("name", types::varchar(255));
-                t.add_column("location", types::foreign("cities"));
-                t.add_column("founded", types::date());
-            });
+// /// Create an in-memory database and run migrations on it
+// fn create_database() -> Connection {
+//     Connection::open_in_memory()
+//         .and_then(|c| c.execute(&{
+//             let mut m = Migration::new();
+//             m.create_table("prisma", |t| {
+//                 t.add_column("name", types::varchar(255));
+//                 t.add_column("location", types::foreign("cities"));
+//                 t.add_column("founded", types::date());
+//             });
 
-            m.make::<Squirrel>()
-        }, NO_PARAMS).map(|_| c))
-        .and_then(|c| c.execute(&{
-            let mut m = Migration::new();
-            m.create_table("cities", |t| {
-                t.add_column("long", types::float());
-                t.add_column("name", types::varchar(255));
-                t.add_column("lat", types::float());
-            });
+//             m.make::<Squirrel>()
+//         }, NO_PARAMS).map(|_| c))
+//         .and_then(|c| c.execute(&{
+//             let mut m = Migration::new();
+//             m.create_table("cities", |t| {
+//                 t.add_column("long", types::float());
+//                 t.add_column("name", types::varchar(255));
+//                 t.add_column("lat", types::float());
+//             });
 
-            m.make::<Squirrel>()
-        }, NO_PARAMS).map(|_| c))
-        .map_err(|e| panic!(e))
-        .unwrap()
-}
+//             m.make::<Squirrel>()
+//         }, NO_PARAMS).map(|_| c))
+//         .map_err(|e| panic!(e))
+//         .unwrap()
+// }
 
-/// Use prisma-query to get the table names
-fn query_tables(c: &mut Connection) -> Vec<String> {
-    let sql = "SELECT name FROM sqlite_master WHERE type = 'table'";
+// /// Use prisma-query to get the table names
+// fn query_tables(c: &mut Connection) -> Vec<String> {
+//     let sql = "SELECT name FROM sqlite_master WHERE type = 'table'";
 
-    (|| -> Result<()> {
-        let mut stmt = c.prepare(sql)?;
+//     (|| -> Result<()> {
+//         let mut stmt = c.prepare(sql)?;
 
 
-        let name_iter = stmt.query_map(NO_PARAMS, |row| NameCol { name: row.get(0) })?;
+//         let name_iter = stmt.query_map(NO_PARAMS, |row| NameCol { name: row.get(0) })?;
 
-        name_iter
-            .into_iter()
-            .filter_map(|i| i.ok())
-            .for_each(|i| println!("Table: {}", i.name));
+//         name_iter
+//             .into_iter()
+//             .filter_map(|i| i.ok())
+//             .for_each(|i| println!("Table: {}", i.name));
 
-        Ok(())
-    })()
-    .map_err(|e| panic!(e));
+//         Ok(())
+//     })()
+//     .map_err(|e| panic!(e));
 
-    vec![]
-}
+//     vec![]
+// }
 
-use time::Timespec;
+// use time::Timespec;
 
-#[derive(Debug)]
-struct NameCol {
-    name: String,
-}
+// #[derive(Debug)]
+// struct NameCol {
+//     name: String,
+// }
 
 // struct Person {
 //     id: i32,
@@ -65,10 +64,10 @@ struct NameCol {
 //     data: Option<Vec<u8>>,
 // }
 
-
 fn main() {
-    let mut c = create_database();
-    println!("{:?}", query_tables(&mut c));
+    // let mut c = create_database();
+    // println!("{:?}", query_tables(&mut c));
+}
 
     // c.execute(
     //     "CREATE TABLE person (
@@ -109,4 +108,3 @@ fn main() {
     //     println!("Found person {:?}", person.unwrap());
     // }
 
-}

@@ -1,6 +1,6 @@
 mod sqlite;
 
-pub use sqlite::Sqlite;
+pub use self::sqlite::Sqlite;
 pub type PrismaDataResolver = Box<dyn DataResolver + Send + Sync + 'static>;
 
 use crate::{ordering::OrderVec, protobuf::prelude::*};

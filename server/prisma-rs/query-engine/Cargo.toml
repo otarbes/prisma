@@ -5,7 +5,7 @@ authors = ["Dominic Petrick <petrick@prisma.io>", "Julius de Bruijn <bruijn@pris
 edition = "2018"
 
 [lib]
-crate-type = ["dylib", "staticlib"]
+crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 prost = "0.4"
@@ -14,8 +14,8 @@ prost-types = "0.4"
 bytes = "0.4"
 lazy_static = "1.2"
 r2d2 = "0.8"
-r2d2_sqlite = "0.8"
-rusqlite = { version = "0.16", features = ["chrono"] }
+r2d2-sqlite3 = { path = "../libs/r2d2-sqlite3" }
+sqlite = "0.24"
 chrono = { version = "0.4", features = ["serde"] }
 serde_json = "1.0"
 serde_yaml = "0.8"
@@ -26,7 +26,7 @@ env_logger = "0.6"
 tower-service = "0.2"
 futures = "0.1"
 tokio = "0.1"
-prisma-query = { git = "https://github.com/prisma/prisma-query.git", branch = "master"}
+prisma-query = { git = "https://github.com/prisma/prisma-query.git", branch = "sqlite_backend" }
 prisma-common = { path = "../libs/prisma-common" }
 prisma-models = { path = "../prisma-models" }
 

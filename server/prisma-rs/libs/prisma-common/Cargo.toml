@@ -11,5 +11,5 @@ serde = "1.0"
 url = "1.7"
 r2d2 = "0.8"
 prost = "0.4"
-rusqlite = { version = "0.16", features = ["chrono"] }
+sqlite = "0.24"
 url_serde = "0.2"

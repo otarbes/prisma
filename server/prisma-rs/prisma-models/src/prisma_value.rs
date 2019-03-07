@@ -1,8 +1,7 @@
 use prisma_query::ast::*;
 
-use chrono::{DateTime, Utc};
-use rusqlite::types::{FromSql, FromSqlResult, ValueRef};
 use std::fmt;
+use chrono::{DateTime, Utc};
 
 #[derive(Debug, PartialEq)]
 pub enum GraphqlId {
@@ -65,14 +64,5 @@ impl Into<DatabaseValue> for PrismaValue {
             PrismaValue::GraphqlId(GraphqlId::Int(i)) => (i as i64).into(),
             PrismaValue::GraphqlId(GraphqlId::UUID(s)) => s.into(),
         }
-    }
-}
-
-impl FromSql for GraphqlId {
-    fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
-        value
-            .as_str()
-            .map(|strval| GraphqlId::String(strval.to_string()))
-            .or_else(|_| value.as_i64().map(|intval| GraphqlId::Int(intval as usize)))
     }
 }

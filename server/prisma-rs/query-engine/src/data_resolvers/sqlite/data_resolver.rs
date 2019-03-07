@@ -15,19 +15,18 @@ impl DataResolver for Sqlite {
             let (query_sql, params) = dbg!(visitor::Sqlite::build(query_ast));
             let mut stmt = conn.prepare(&query_sql)?;
 
-            let nodes_iter = stmt.query_map(&params, |row| {
-                fields
-                    .iter()
-                    .filter(|f| !f.is_list)
-                    .enumerate()
-                    .map(|(i, field)| Self::fetch_value(field.type_identifier, &row, i))
-                    .collect()
-            })?;
+            // let nodes_iter = stmt.query_map(&params, |row| {
+            //     fields
+            //         .iter()
+            //         .enumerate()
+            //         .map(|(i, field)| Self::fetch_value(field.type_identifier, &row, i))
+            //         .collect()
+            // })?;
 
             let mut nodes = Vec::new();
-            for node in nodes_iter {
-                nodes.push(node?);
-            }
+            // for node in nodes_iter {
+            //     nodes.push(node?);
+            // }
 
             Ok(dbg!((nodes, names)))
         })

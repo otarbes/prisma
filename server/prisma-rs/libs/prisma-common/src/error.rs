@@ -63,12 +63,12 @@ impl From<r2d2::Error> for Error {
     }
 }
 
-impl From<rusqlite::Error> for Error {
-    fn from(e: rusqlite::Error) -> Error {
-        match e {
-            rusqlite::Error::QueryReturnedNoRows => Error::NoResultError,
-            _ => Error::QueryError("Error querying SQLite database", Some(Box::new(e))),
-        }
+impl From<sqlite::Error> for Error {
+    fn from(e: sqlite::Error) -> Error {
+        // TODO(katharina): Properly handle sqlite errors
+        // This can't currently be done because the sqlite
+        // crate doesn't properly expose these errors as variants.
+        Error::QueryError("Error querying SQLite database", Some(Box::new(e)))
     }
 }
 
